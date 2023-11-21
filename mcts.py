@@ -144,6 +144,8 @@ class MonteCarloTreeSearch:
         """
         node = self.root
         state = deepcopy(self.game)
+        # print('MCTS BOARD')
+        # state.print_board()
 
         # stop if we find reach a leaf node
         while node.is_not_leaf():
@@ -184,10 +186,15 @@ class MonteCarloTreeSearch:
 
         """
         # print("rollout")
-        moves = list(state.get_valid_moves(state.current_player))
+        valid_moves = list(state.get_valid_moves(state.current_player))
+        moves = []
+        for idx, move in enumerate(valid_moves):
+            if move == 1:
+                moves.append(idx)
         # moves = state.moves()  # Get a list of all possible moves in current state of the game
-        count = 5
-        while count > 0 and state.check_game_over(state.current_player)[1] == 0:
+        # count = 10
+        count = 100
+        while count > 0 and state.check_game_over(state.current_player)[1] == 0 and moves:
             # print("rollout moves:", len(moves))
             move = choice(moves)
             state.play_action(move)
