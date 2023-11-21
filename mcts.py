@@ -1,58 +1,39 @@
-# MIT License
-#
-# Copyright (c) 2019 Yurii Tolochko & Blanyal D'Souza.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-# ==============================================================================
-"""Classes for Monte Carlo Tree Search."""
-import math
-
-import numpy as np
-
-from config import CFG
+from math import sqrt, log
 from copy import deepcopy
+from queue import Queue
+from random import choice
+from time import time as clock
 
+from blokus.blokus_game import BlokusGame
 
-class TreeNode(object):
+class Node:
     """Represents a board state and stores statistics for actions at that state.
 
     Attributes:
         Nsa: An integer for visit count.
-        Wsa: A float for the total action value.
+        Q_RAVE (int): times this move has been critical in a rollout
+        N_RAVE (int): times this move has appeared in a rollout
         Qsa: A float for the mean action value.
-        Psa: A float for the prior probability of reaching this node.
         action: A tuple(row, column) of the prior move of reaching this node.
         children: A list which stores child nodes.
-        child_psas: A vector containing child probabilities.
         parent: A TreeNode representing the parent node.
+        outcome (int): If node is a leaf, then outcome indicates
+                       the winner, else None
     """
+    def __init__(self, parent=None, action=None):
+        """
+        Initialize a new node with optional move and parent and initially empty
+        children list and rollout statistics and unspecified outcome.
 
-    def __init__(self, parent=None, action=None, psa=0.0, child_psas=[]):
-        """Initializes TreeNode with the initial statistics and data."""
-        self.Nsa = 0
-        self.Wsa = 0.0
-        self.Qsa = 0.0
-        self.Psa = psa
+        """
         self.action = action
-        self.children = []
-        self.child_psas = child_psas
         self.parent = parent
+        self.N = 0  # times this position was visited
+        self.Q = 0  # average reward (wins-losses) from this position
+        self.Q_RAVE = 0  # times this move has been critical in a rollout
+        self.N_RAVE = 0  # times this move has appeared in a rollout
+        self.children = {}
+        self.outcome = 0
 
     def is_not_leaf(self):
         """Checks if a TreeNode is a leaf.
@@ -64,193 +45,234 @@ class TreeNode(object):
             return True
         return False
 
-    def select_child(self):
-        """Selects a child node based on the AlphaZero PUCT formula.
-
-        Returns:
-            A child TreeNode which is the most promising according to PUCT.
-        """
-        c_puct = CFG.c_puct
-
-        highest_uct = 0
-        highest_index = 0
-
-        # Select the child with the highest Q + U value
-        for idx, child in enumerate(self.children):
-            uct = child.Qsa + child.Psa * c_puct * (
-                    math.sqrt(self.Nsa) / (1 + child.Nsa))
-            if uct > highest_uct:
-                highest_uct = uct
-                highest_index = idx
-
-        return self.children[highest_index]
-
-    def expand_node(self, game, psa_vector):
+    def expand_node(self, game):
         """Expands the current node by adding valid moves as children.
 
         Args:
             game: An object containing the game state.
-            psa_vector: A list containing move probabilities for each move.
         """
-        self.child_psas = deepcopy(psa_vector)
+        # self.child_psas = deepcopy(psa_vector)
+        print("expand node")
         valid_moves = game.get_valid_moves(game.current_player)
+        if valid_moves is None:
+            return False
         for idx, move in enumerate(valid_moves):
             if move == 1:
                 action = idx
-                self.add_child_node(parent=self, action=action,
-                                    psa=psa_vector[idx])
-
+                self.add_child_node(parent=self, action=action)
+        return True
+                
     def add_child_node(self, parent, action, psa=0.0):
-        """Creates and adds a child TreeNode to the current node.
+        """Creates and adds a child Node to the current node.
 
         Args:
-            parent: A TreeNode which is the parent of this node.
+            parent: A Node which is the parent of this node.
             action: A tuple(row, column) of the prior move to reach this node.
-            psa: A float representing the raw move probability for this node.
-
         Returns:
-            The newly created child TreeNode.
+            The newly created child Node.
         """
 
-        child_node = TreeNode(parent=parent, action=action, psa=psa)
-        self.children.append(child_node)
+        child_node = Node(parent=parent, action=action)
+        self.children[child_node.action] = child_node
         return child_node
 
-    def back_prop(self, wsa, v):
-        """Update the current node's statistics based on the game outcome.
-
-        Args:
-            wsa: A float representing the action value for this state.
-            v: A float representing the network value of this state.
+    @property
+    def value(self, explore: float = 0.5):
         """
-        self.Nsa += 1
-        self.Wsa = wsa + v
-        self.Qsa = self.Wsa / self.Nsa
+        Calculate the UCT value of this node relative to its parent, the parameter
+        "explore" specifies how much the value should favor nodes that have
+        yet to be thoroughly explored versus nodes that seem to have a high win
+        rate.
+        Currently explore is set to 0.5.
 
+        """
+        # if the node is not visited, set the value as infinity. Nodes with no visits are on priority
+        # (lambda: print("a"), lambda: print("b"))[test==true]()
+        if self.N == 0:
+            return 0 if explore == 0 else float('inf')
+        else:
+            return self.Q / self.N + explore * sqrt(2 * log(self.parent.N) / self.N)  # exploitation + exploration
 
-class MonteCarloTreeSearch(object):
-    """Represents a Monte Carlo Tree Search Algorithm.
-
+class MonteCarloTreeSearch:
+    """
+    Basic no frills implementation of an agent that preforms MCTS for hex.
     Attributes:
-        root: A TreeNode representing the board state and its statistics.
         game: An object containing the game state.
-        net: An object containing the neural network.
+        root (Node): Root of the tree search
+        run_time (int): time per each run
+        node_count (int): the whole nodes in tree
+        num_rollouts (int): The number of rollouts for each search
+        EXPLORATION (int): specifies how much the value should favor
+                           nodes that have yet to be thoroughly explored versus nodes
+                           that seem to have a high win rate.
     """
 
-    def __init__(self, net):
-        """Initializes TreeNode with the TreeNode, board and neural network."""
-        self.root = None
-        self.game = None
-        self.net = net
-
-    def search(self, game, node, temperature):
-        """MCTS loop to get the best move which can be played at a given state.
-
-        Args:
-            game: An object containing the game state.
-            node: A TreeNode representing the board state and its statistics.
-            temperature: A float to control the level of exploration.
-
-        Returns:
-            A child node representing the best move to play at this state.
-        """
-        self.root = node
+    def __init__(self, game: BlokusGame):
         self.game = game
+        self.root = Node()
+        self.run_time = 0
+        self.node_count = 0
+        self.num_rollouts = 0
 
-        for i in range(CFG.num_mcts_sims):
-            # print('SIMULATION N ', i)
-            node = self.root
-            temp_game = deepcopy(self.game)  # Create a fresh clone for each loop.
+    def search(self, time_budget: int) -> None:
+        """
+        Search and update the search tree for a
+        specified amount of time in seconds.
+        """
+        start_time = clock()
+        num_rollouts = 0
 
-            # Loop when node is not a leaf
-            while node.is_not_leaf():
-                node = node.select_child()
-                temp_game.play_action(node.action)
-                
-            # Get move probabilities and values from the network for this state.
-            psa_vector, v = self.net.predict(temp_game.state)
+        # do until we exceed our time budget
+        while clock() - start_time < time_budget:
+            # print("rollouts: ", num_rollouts)
+            print(clock() - start_time)
+            node, state = self.select_node()
+            turn = state.current_player * -1
+            outcome = self.roll_out(state)
+            self.backup(node, turn, outcome)
+            num_rollouts += 1
+        run_time = clock() - start_time
+        node_count = self.tree_size()
+        self.run_time = run_time
+        self.node_count = node_count
+        self.num_rollouts = num_rollouts
 
-            # Add Dirichlet noise to the psa_vector of the root node.
-            if node.parent is None:
-                psa_vector = self.add_dirichlet_noise(temp_game, psa_vector)
+    def select_node(self) -> tuple:
+        """
+        Select a node in the tree to preform a single simulation from.
 
-            
-            valid_moves = temp_game.get_valid_moves(temp_game.current_player)
-            for idx, move in enumerate(valid_moves):
-                if move == 0:
-                    psa_vector[idx] = 0
+        """
+        node = self.root
+        state = deepcopy(self.game)
 
-            psa_vector_sum = sum(psa_vector)
+        # stop if we find reach a leaf node
+        while node.is_not_leaf():
+            # descend to the maximum value node, break ties at random
+            children = node.children.values()
+            max_value = max(children, key=lambda n: n.value).value
+            max_nodes = [n for n in node.children.values()
+                         if n.value == max_value]
+            node = choice(max_nodes)
+            state.play_action(node.action)
 
-            # Renormalize psa vector
-            if psa_vector_sum > 0:
-                psa_vector /= psa_vector_sum
+            # if some child node has not been explored select it before expanding
+            # other children
+            if node.N == 0:
+                return node, state
 
-            # Try expanding the current node.
-            node.expand_node(game=temp_game, psa_vector=psa_vector)
-            game_over, wsa = temp_game.check_game_over(temp_game.current_player)
-            while node is not None:
-                wsa = -wsa
-                v = -v
-                node.back_prop(wsa, v)
-                node = node.parent
-
-        highest_nsa = 0
-        highest_index = 0
-        highest_child = 0
-        # Select the child's move using a temperature parameter.
-        probvector = np.zeros(len(psa_vector))    
-        s = 0
-        # temperature_exponent = int(1 / temperature)
-        
-        if temperature == 1:
-            for idx, child in enumerate(self.root.children):
-                # print(idx, child.Nsa)
-                s += child.Nsa
-                probvector[child.action] = child.Nsa
-                if child.Nsa > highest_nsa:
-                    highest_nsa = child.Nsa
-                    # highest_index = child.action
-                    highest_child = idx
-            probvector /= s
-        
-        else:
-            for idx, child in enumerate(self.root.children):
-                if child.Nsa > highest_nsa:
-                    probvector[highest_index] = 0
-                    highest_nsa = child.Nsa
-                    highest_index = child.action
-                    probvector[highest_index] = 1
-                    highest_child = idx
-
-        if len(self.root.children) > 0:
-            # print(s, self.root.Nsa, len(self.root.children))
-            # print(probvector[np.nonzero(probvector)])
-            # print(self.root.child_psas[np.nonzero(self.root.child_psas)])
-            # print(np.nonzero(probvector) == np.nonzero(self.root.child_psas))
-            return self.root.children[highest_child], probvector
-        else:
-            return None, probvector
-
-    def add_dirichlet_noise(self, game, psa_vector):
-        """Add Dirichlet noise to the psa_vector of the root node.
-
-        This is for additional exploration.
+        # if we reach a leaf node generate its children and return one of them
+        # if the node is terminal, just return the terminal node
+        # node.expand_node(game=state)
+        if node.expand_node(game=state) and len(node.children.values()) > 0:
+        # game_over, wsa = state.check_game_over(state.current_player)
+        # if not game_over and len(node.children.values()) > 0:
+            print(len(node.children.values()))
+            node = choice(list(node.children.values()))
+            state.play_action(node.action)
+        # if self.expand(node, state):
+        #     node = choice(list(node.children.values()))
+        #     state.play(node.action)
+        return node, state
+    
+    @staticmethod
+    def roll_out(state: BlokusGame) -> int:
+        """
+        Simulate an entirely random game from the passed state and return the winning
+        player.
 
         Args:
-            game: An object containing the game state.
-            psa_vector: A probability vector.
+            state: game state
 
         Returns:
-            A probability vector which has Dirichlet noise added to it.
+            int: winner of the game
+
         """
-        dirichlet_input = [CFG.dirichlet_alpha for x in range(game.action_size)]
+        print("rollout")
+        moves = list(state.get_valid_moves(state.current_player))
+        # moves = state.moves()  # Get a list of all possible moves in current state of the game
+        count = 5
+        while count > 0 and state.check_game_over(state.current_player)[1] == 0:
+            # print("rollout moves:", len(moves))
+            move = choice(moves)
+            state.play_action(move)
+            moves.remove(move)
+            count -= 1
+        return state.check_game_over(state.current_player)[1]
+    
+    @staticmethod
+    def backup(node: Node, turn: int, outcome: int) -> None:
+        """
+        Update the node statistics on the path from the passed node to root to reflect
+        the outcome of a randomly simulated playout.
 
-        dirichlet_list = np.random.dirichlet(dirichlet_input)
-        noisy_psa_vector = []
+        Args:
+            node:
+            turn: winner turn
+            outcome: outcome of the rollout
 
-        for idx, psa in enumerate(psa_vector):
-            noisy_psa_vector.append(
-                (1 - CFG.epsilon) * psa + CFG.epsilon * dirichlet_list[idx])
+        Returns:
+            object:
 
-        return noisy_psa_vector
+        """
+        print("backup")
+        # Careful: The reward is calculated for player who just played
+        # at the node and not the next player to play
+        reward = 0 if outcome == turn else 1
+
+        while node is not None:
+            node.N += 1
+            node.Q += reward
+            node = node.parent
+            reward = 0 if reward == 1 else 1
+
+    def tree_size(self) -> int:
+        """
+        Count nodes in tree by BFS.
+        """
+        Q = Queue()
+        count = 0
+        Q.put(self.root)
+        while not Q.empty():
+            node = Q.get()
+            count += 1
+            for child in node.children.values():
+                Q.put(child)
+        return count
+    
+    def best_move(self) -> int:
+        """
+        Return the best move according to the current tree.
+        Returns:
+            best move in terms of the most simulations number unless the game is over
+        """
+        game_over, player = self.game.check_game_over(self.game.current_player)
+        print("bestmove", game_over, player)
+        if game_over:
+            return -1
+
+        # choose the move of the most simulated node breaking ties randomly
+        max_value = max(self.root.children.values(), key=lambda n: n.N).N
+        max_nodes = [n for n in self.root.children.values() if n.N == max_value]
+        bestchild = choice(max_nodes)
+        return bestchild.action
+
+    def move(self, move: int) -> None:
+        """
+        Make the passed move and update the tree appropriately. It is
+        designed to let the player choose an action manually (which might
+        not be the best action).
+        Args:
+            move:
+        """
+        print("move: ", move)
+        if move in self.root.children:
+            child = self.root.children[move]
+            child.parent = None
+            self.root = child
+            self.game.play_action(child.action)
+            return
+
+        # if for whatever reason the move is not in the children of
+        # the root just throw out the tree and start over
+        self.game.play_action(move)
+        self.root = Node()

@@ -110,6 +110,7 @@ class BlokusGame(Game):
         self.corners[-self.current_player] = set([(i, j) for (i, j) in self.corners[-self.current_player] if self.state[i][j] == 0])
 
         self.current_player *= -1
+        # self.print_board()
 
     
     def get_valid_moves(self, current_player):
@@ -139,7 +140,6 @@ class BlokusGame(Game):
         else:
             return True, -1
 
-        return True, 0
     def remove_piece(self, piece):
         """
         Removes a given piece (Shape object) from the list of pieces a player has.
