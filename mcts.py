@@ -52,7 +52,7 @@ class Node:
             game: An object containing the game state.
         """
         # self.child_psas = deepcopy(psa_vector)
-        print("expand node")
+        # print("expand node")
         valid_moves = game.get_valid_moves(game.current_player)
         if valid_moves is None:
             return False
@@ -125,7 +125,7 @@ class MonteCarloTreeSearch:
         # do until we exceed our time budget
         while clock() - start_time < time_budget:
             # print("rollouts: ", num_rollouts)
-            print(clock() - start_time)
+            # print(clock() - start_time)
             node, state = self.select_node()
             turn = state.current_player * -1
             outcome = self.roll_out(state)
@@ -164,14 +164,10 @@ class MonteCarloTreeSearch:
         # if the node is terminal, just return the terminal node
         # node.expand_node(game=state)
         if node.expand_node(game=state) and len(node.children.values()) > 0:
-        # game_over, wsa = state.check_game_over(state.current_player)
-        # if not game_over and len(node.children.values()) > 0:
-            print(len(node.children.values()))
+            # print(len(node.children.values()))
+            # print("expand")
             node = choice(list(node.children.values()))
             state.play_action(node.action)
-        # if self.expand(node, state):
-        #     node = choice(list(node.children.values()))
-        #     state.play(node.action)
         return node, state
     
     @staticmethod
@@ -187,7 +183,7 @@ class MonteCarloTreeSearch:
             int: winner of the game
 
         """
-        print("rollout")
+        # print("rollout")
         moves = list(state.get_valid_moves(state.current_player))
         # moves = state.moves()  # Get a list of all possible moves in current state of the game
         count = 5
@@ -214,7 +210,7 @@ class MonteCarloTreeSearch:
             object:
 
         """
-        print("backup")
+        # print("backup")
         # Careful: The reward is calculated for player who just played
         # at the node and not the next player to play
         reward = 0 if outcome == turn else 1
@@ -246,11 +242,14 @@ class MonteCarloTreeSearch:
             best move in terms of the most simulations number unless the game is over
         """
         game_over, player = self.game.check_game_over(self.game.current_player)
-        print("bestmove", game_over, player)
-        if game_over:
+        # print("bestmove", game_over, player)
+        # print(self.game.current_player)
+        # self.game.print_board()
+        if game_over or len(self.root.children) == 0:
             return -1
 
         # choose the move of the most simulated node breaking ties randomly
+        # print(len(self.root.children))
         max_value = max(self.root.children.values(), key=lambda n: n.N).N
         max_nodes = [n for n in self.root.children.values() if n.N == max_value]
         bestchild = choice(max_nodes)
@@ -264,7 +263,7 @@ class MonteCarloTreeSearch:
         Args:
             move:
         """
-        print("move: ", move)
+        # print("move: ", move)
         if move in self.root.children:
             child = self.root.children[move]
             child.parent = None
