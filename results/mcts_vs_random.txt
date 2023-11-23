@@ -1,0 +1,7 @@
+MCTS vs. Random
+Game 1 score: {1: 46, -1: 34}
+Game 2 score: {1: 49, -1: 36}
+Game 3 score: {1: 51, -1: 25}
+Game 4 score: {1: 38, -1: 42}
+Game 5 score: {1: 51, -1: 38}
+Final score: 4 1

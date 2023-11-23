@@ -1,32 +1,9 @@
-# MIT License
-#
-# Copyright (c) 2019 Yurii Tolochko.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-# ==============================================================================
-
 from copy import deepcopy
 import numpy as np
 import math
 import random
 import copy
-from termcolor import colored
+# from termcolor import colored
 
 
 from game import Game
@@ -59,41 +36,41 @@ class BlokusGame(Game):
     def print_board(self):
         print(self.state)
 
-    def colorBoard(self):
-        n = 2
-        """
-        A bit of colour to check better.
-        """
-        print(' ' * n, end = ' ')
-        for i in range(self.state.shape[1]):
-            print(colored("{0:2d}".format(i+1), 'blue'), end = ' ')
-        print(' ')
-        for i, row in enumerate(self.state):
-            print(colored("{0:2d}".format(i+1), 'blue'), end = ' ')
-            for p, v in enumerate(row):
-                if v == -1:
-                    if p == len(row) -1:
-                        print(colored("{0:2d}".format(v), 'green'))
-                    else:
-                        print(colored("{0:2d}".format(v),'green'), sep=' ', end= ' ', flush= True)
-                elif v == 1:
-                    if p == len(row) -1:
-                        print(colored("{0:2d}".format(v), 'red'))
-                    else:
-                        print(colored("{0:2d}".format(v), 'red'), sep=' ', end= ' ', flush= True)
+    # def colorBoard(self):
+    #     n = 2
+    #     """
+    #     A bit of colour to check better.
+    #     """
+    #     print(' ' * n, end = ' ')
+    #     for i in range(self.state.shape[1]):
+    #         print(colored("{0:2d}".format(i+1), 'blue'), end = ' ')
+    #     print(' ')
+    #     for i, row in enumerate(self.state):
+    #         print(colored("{0:2d}".format(i+1), 'blue'), end = ' ')
+    #         for p, v in enumerate(row):
+    #             if v == -1:
+    #                 if p == len(row) -1:
+    #                     print(colored("{0:2d}".format(v), 'green'))
+    #                 else:
+    #                     print(colored("{0:2d}".format(v),'green'), sep=' ', end= ' ', flush= True)
+    #             elif v == 1:
+    #                 if p == len(row) -1:
+    #                     print(colored("{0:2d}".format(v), 'red'))
+    #                 else:
+    #                     print(colored("{0:2d}".format(v), 'red'), sep=' ', end= ' ', flush= True)
                 
-                # temporary just for visualizing move before accepting 
-                elif v == 2:
-                    if p == len(row) -1:
-                        print("{0:2d}".format(v))
-                    else:
-                        print("{0:2d}".format(v), sep=' ', end= ' ', flush= True)
+    #             # temporary just for visualizing move before accepting 
+    #             elif v == 2:
+    #                 if p == len(row) -1:
+    #                     print("{0:2d}".format(v))
+    #                 else:
+    #                     print("{0:2d}".format(v), sep=' ', end= ' ', flush= True)
 
-                elif v == 0:
-                    if p == len(row) -1:
-                        print("{0:2d}".format(v))
-                    else:
-                        print("{0:2d}".format(v), sep=' ', end= ' ', flush= True)
+    #             elif v == 0:
+    #                 if p == len(row) -1:
+    #                     print("{0:2d}".format(v))
+    #                 else:
+    #                     print("{0:2d}".format(v), sep=' ', end= ' ', flush= True)
 
 
     def play_action(self, action):

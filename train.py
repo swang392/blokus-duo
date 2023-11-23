@@ -21,13 +21,30 @@ class Train(object):
 
     def start(self):
         """playing loop"""
-        for i in range(CFG.num_iterations):
-            print("Game", i+1)
-
+        p1_score = 0
+        p2_score = 0
+        f = open("results/mcts_vs_random.txt", "w")
+        f.write("MCTS vs. Random\n")
+        print("MCTS vs. Random")
+        # for i in range(CFG.num_iterations):
+        for i in range(5):
             game = deepcopy(self.game)
-            self.play_game(game)
+            score = self.mcts_vs_random(game)
+            print("Game", i+1, "score:", score)
+            if score[1] > score[-1]:
+                p1_score += 1
+            elif score[1] < score[-1]:
+                p2_score += 1
+            else:
+                p1_score += 0.5
+                p2_score += 0.5
+            f.write("Game " + str(i+1) + " score: " + str(score) + "\n")
 
-    def play_game(self, game: BlokusGame):
+        print("final score", p1_score, p2_score)
+        f.write("Final score: " + str(p1_score) + " " + str(p2_score) + "\n")
+        f.close()
+
+    def mcts_vs_random(self, game: BlokusGame) -> dict:
         """Loop for each self-play game.
 
         Runs MCTS for each game state and plays a move based on the MCTS output.
@@ -103,4 +120,5 @@ class Train(object):
             print("current score", game.score)
             
         print('FINAL SCORES ARE ', game.score)
+        return game.score
         game.print_board()

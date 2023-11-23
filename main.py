@@ -204,7 +204,7 @@ if __name__ == '__main__':
     train = Train(game)
     train.start()
 
-    print("start train")
+    # print("start train")
     # if CFG.human_play:
     #     human_player = Human_player(game, net)
     #     human_player.play()
