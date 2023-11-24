@@ -21,27 +21,47 @@ class Train(object):
 
     def start(self):
         """playing loop"""
+        p1_win_score = 0
+        p2_win_score = 0
+        p1_win_margin = 0
+        p2_win_margin = 0
         p1_score = 0
         p2_score = 0
+        
         f = open("results/mcts_vs_random.txt", "w")
         f.write("MCTS vs. Random\n")
         print("MCTS vs. Random")
         # for i in range(CFG.num_iterations):
-        for i in range(5):
+        for i in range(CFG.num_iterations):
             game = deepcopy(self.game)
             score = self.mcts_vs_random(game)
             print("Game", i+1, "score:", score)
             if score[1] > score[-1]:
-                p1_score += 1
+                p1_win_score += 1
+                p1_win_margin += score[1] - score[-1]
             elif score[1] < score[-1]:
-                p2_score += 1
+                p2_win_score += 1
+                p2_win_margin += score[-1] - score[1]
             else:
-                p1_score += 0.5
-                p2_score += 0.5
+                p1_win_score += 0.5
+                p2_win_score += 0.5
+            p1_score += score[1]
+            p2_score += score[-1]
             f.write("Game " + str(i+1) + " score: " + str(score) + "\n")
 
-        print("final score", p1_score, p2_score)
-        f.write("Final score: " + str(p1_score) + " " + str(p2_score) + "\n")
+        print("final win score", p1_win_score, p2_win_score)
+        f.write("Final win score: " + str(p1_win_score) + " " + str(p2_win_score) + "\n")
+        f.write("Average win margin: \n")
+        if p1_win_score != 0:
+            f.write("Player 1: " + str(p1_win_margin/p1_win_score) + "\n")
+            print("Player 1: " + str(p1_win_margin/p1_win_score))
+        if p2_win_score != 0:
+            f.write("Player 2: " + str(p2_win_margin/p2_win_score) + "\n")
+            print("Player 2: " + str(p2_win_margin/p2_win_score))
+        # print("average win margin", p1_win_margin/p1_win_score, p2_win_margin/p2_win_score)
+        # f.write("Average win margin: " + str(p1_win_margin/p1_win_score) + " " + str(p2_win_margin/p2_win_score) + "\n")
+        print("average score", p1_score/CFG.num_iterations, p2_score/CFG.num_iterations)
+        f.write("Average score: " + str(p1_score/CFG.num_iterations) + " " + str(p2_score/CFG.num_iterations) + "\n")
         f.close()
 
     def mcts_vs_random(self, game: BlokusGame) -> dict:
@@ -68,14 +88,14 @@ class Train(object):
                 elif move == -1: # game over
                     # print("GAME OVER")
                     # game_over = True
-                    print('player 1 passed')
+                    # print('player 1 passed')
                     # game.print_board(
-                    print('score', game.score)
+                    # print('score', game.score)
                     randmove = randplayer.choose_move(game)
                     if randmove == -1:
                         game_over = True
                     else:
-                        print("JKKKKK move", randmove)
+                        # print("JKKKKK move", randmove)
                         game.play_action(randmove)
                         game.current_player *= -1
                         
@@ -106,9 +126,9 @@ class Train(object):
                     # print("GAME OVER")
                     # game_over = True
                     # game_over = True
-                    print('player 2 passed')
-                    game.print_board()
-                    print('score', game.score)
+                    # print('player 2 passed')
+                    # game.print_board()
+                    # print('score', game.score)
                     game.current_player *= -1
                     continue
                 # elif move == -2: #pass, game not over
@@ -116,8 +136,8 @@ class Train(object):
                 else:
                     # mcts.play_action(move)
                     randplayer.move(move)
-            game.print_board()
-            print("current score", game.score)
+            # game.print_board()
+            # print("current score", game.score)
             
         print('FINAL SCORES ARE ', game.score)
         return game.score

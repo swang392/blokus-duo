@@ -14,7 +14,7 @@ class RandomPlayer:
         for idx, move in enumerate(valid_moves):
             if move == 1:
                 moves.append(idx)
-        print("random moves", len(moves))
+        # print("random moves", len(moves))
         if len(moves) == 0:
             return -1
         move = choice(moves)
