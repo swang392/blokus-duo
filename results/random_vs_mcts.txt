@@ -1,0 +1,7 @@
+Random vs. MCTS
+Game 1 score: {1: 52, -1: 35}
+Game 2 score: {1: 46, -1: 40}
+Final win score: 2 0
+Average win margin: 
+Player 1: 11.5
+Average score: 49.0 37.5
