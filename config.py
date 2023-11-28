@@ -30,7 +30,7 @@ class CFG(object):
         loss_file: Name of the file to record loss.
         game: Number of the game. 0: Blokus
     """
-    num_iterations = 15
+    num_iterations = 5
     num_games = 1
     num_mcts_sims = 20
     c_puct = 3

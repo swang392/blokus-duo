@@ -202,7 +202,7 @@ if __name__ == '__main__':
     # Play vs the AI as a human instead of training.
     # DOESN'T WORK YET
     train = Train(game)
-    train.start()
+    train.start_random_vs_random()
 
     # print("start train")
     # if CFG.human_play:
