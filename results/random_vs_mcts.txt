@@ -1,7 +1,11 @@
 Random vs. MCTS
-Game 1 score: {1: 52, -1: 35}
-Game 2 score: {1: 46, -1: 40}
-Final win score: 2 0
+Game 1 score: {1: 48, -1: 47}
+Game 2 score: {1: 46, -1: 32}
+Game 3 score: {1: 50, -1: 26}
+Game 4 score: {1: 44, -1: 46}
+Game 5 score: {1: 51, -1: 45}
+Final win score: 4 1
 Average win margin: 
-Player 1: 11.5
-Average score: 49.0 37.5
+Player 1: 11.25
+Player 2: 2.0
+Average score: 47.8 39.2

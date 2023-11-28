@@ -185,6 +185,7 @@ class MonteCarloTreeSearch:
             int: winner of the game
 
         """
+        # TODO: don't simulate the entire game, simulate x number of steps and see who is winning
         # print("rollout")
         valid_moves = list(state.get_valid_moves(state.current_player))
         moves = []

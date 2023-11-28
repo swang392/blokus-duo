@@ -71,12 +71,12 @@ class Train(object):
         p1_score = 0
         p2_score = 0
         
-        f = open("results/random_vs_mcts.txt", "w")
-        f.write("Random vs. MCTS\n")
-        print("Random vs. MCTS")
-        # f = open("results/mcts_vs_random.txt", "w")
-        # f.write("MCTS vs. Random\n")
-        # print("MCTS vs. Random")
+        # f = open("results/random_vs_mcts.txt", "w")
+        # f.write("Random vs. MCTS\n")
+        # print("Random vs. MCTS")
+        f = open("results/mcts_vs_random2.txt", "w")
+        f.write("MCTS vs. Random\n")
+        print("MCTS vs. Random")
         for i in range(CFG.num_iterations):
             game = deepcopy(self.game)
             score = self.random_vs_mcts(game)
@@ -177,7 +177,7 @@ class Train(object):
                     game.current_player *= -1
                     continue
                 else:
-                    mcts.search(time_budget=5)
+                    mcts.search(time_budget=15)
                     move = mcts.best_move()
                     mcts.move(move)
             elif game.current_player == 1:
