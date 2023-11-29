@@ -30,10 +30,11 @@ class Node:
         self.parent = parent
         self.N = 0  # times this position was visited
         self.Q = 0  # average reward (wins-losses) from this position
-        self.Q_RAVE = 0  # times this move has been critical in a rollout
-        self.N_RAVE = 0  # times this move has appeared in a rollout
+        # self.Q_RAVE = 0  # times this move has been critical in a rollout
+        # self.N_RAVE = 0  # times this move has appeared in a rollout
         self.children = {}
         self.outcome = 0
+        self.expanded = 0
 
     def is_not_leaf(self):
         """Checks if a TreeNode is a leaf.
@@ -52,17 +53,18 @@ class Node:
             game: An object containing the game state.
         """
         # self.child_psas = deepcopy(psa_vector)
-        # print("expand node")
+        
         valid_moves = game.get_valid_moves(game.current_player)
         if valid_moves is None:
             return False
+        # print("expand node", sum(valid_moves))
         for idx, move in enumerate(valid_moves):
             if move == 1:
                 action = idx
-                self.add_child_node(parent=self, action=action)
+                self.add_child_node(action=action)
         return True
                 
-    def add_child_node(self, parent, action, psa=0.0):
+    def add_child_node(self, action, psa=0.0):
         """Creates and adds a child Node to the current node.
 
         Args:
@@ -71,8 +73,8 @@ class Node:
         Returns:
             The newly created child Node.
         """
-
-        child_node = Node(parent=parent, action=action)
+        self.expanded += 1
+        child_node = Node(parent=self, action=action)
         self.children[child_node.action] = child_node
         return child_node
 
@@ -149,6 +151,7 @@ class MonteCarloTreeSearch:
 
         # stop if we find reach a leaf node
         while node.is_not_leaf():
+            # print("not leaf")
             # descend to the maximum value node, break ties at random
             children = node.children.values()
             max_value = max(children, key=lambda n: n.value).value
@@ -170,6 +173,9 @@ class MonteCarloTreeSearch:
             # print("expand")
             node = choice(list(node.children.values()))
             state.play_action(node.action)
+
+        # print(self.tree_size())
+        # print(len(self.root.children.keys()), self.root.action)
         return node, state
     
     @staticmethod
