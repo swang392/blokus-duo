@@ -71,12 +71,12 @@ class Train(object):
         p1_score = 0
         p2_score = 0
         
-        # f = open("results/random_vs_mcts.txt", "w")
-        # f.write("Random vs. MCTS\n")
-        # print("Random vs. MCTS")
-        f = open("results/mcts_vs_random2.txt", "w")
-        f.write("MCTS vs. Random\n")
-        print("MCTS vs. Random")
+        f = open("results/random_mcts.txt", "w")
+        f.write("Random vs. MCTS\n")
+        print("Random vs. MCTS")
+        # f = open("results/mcts_random.txt", "w")
+        # f.write("MCTS vs. Random\n")
+        # print("MCTS vs. Random")
         for i in range(CFG.num_iterations):
             game = deepcopy(self.game)
             score = self.random_vs_mcts(game)
@@ -118,23 +118,25 @@ class Train(object):
         move = None
         # node = Node()
         while not game_over:
+            # game.print_board()
             if game.current_player == 1:
                 if game.check_game_over(game.current_player)[0]: # if game ended
                     game_over = True
                     continue
-                elif move == -1: # game over
-                    randmove = randplayer.choose_move(game)
-                    if randmove == -1:
-                        game_over = True
-                    else:
-                        game.play_action(randmove)
-                        game.current_player *= -1
-                        
-                    game.current_player *= -1
-                    continue
                 else:
-                    mcts.search(time_budget=3)
+                    mcts.search(time_budget=12)
                     move = mcts.best_move()
+                    if move == -1:
+                        #  elif move == -1: # game over
+                        randmove = randplayer.choose_move(game)
+                        if randmove == -1:
+                            game_over = True
+                        else:
+                            game.play_action(randmove)
+                            game.current_player *= -1
+                            
+                        game.current_player *= -1
+                        continue
                     mcts.move(move)
             elif game.current_player == -1:
                 if game.check_game_over(game.current_player)[0]: # if game ended
@@ -148,6 +150,7 @@ class Train(object):
                     randplayer.move(move)
             
         print('FINAL SCORES ARE ', game.score)
+        game.print_board()
         return game.score
         # game.print_board()
 
@@ -162,23 +165,34 @@ class Train(object):
         move = None
         # node = Node()
         while not game_over:
+            # game.print_board()
             if game.current_player == -1:
                 if game.check_game_over(game.current_player)[0]: # if game ended
                     game_over = True
                     continue
-                elif move == -1: # game over
-                    randmove = randplayer.choose_move(game)
-                    if randmove == -1:
-                        game_over = True
-                    else:
-                        game.play_action(randmove)
-                        game.current_player *= -1
+                # elif move == -1: # game over
+                #     randmove = randplayer.choose_move(game)
+                #     if randmove == -1:
+                #         game_over = True
+                #     else:
+                #         game.play_action(randmove)
+                #         game.current_player *= -1
                         
-                    game.current_player *= -1
-                    continue
+                #     game.current_player *= -1
+                #     continue
                 else:
-                    mcts.search(time_budget=15)
+                    mcts.search(time_budget=12)
                     move = mcts.best_move()
+                    if move == -1:
+                        randmove = randplayer.choose_move(game)
+                        if randmove == -1:
+                            game_over = True
+                        else:
+                            game.play_action(randmove)
+                            game.current_player *= -1
+                            
+                        game.current_player *= -1
+                        continue
                     mcts.move(move)
             elif game.current_player == 1:
                 if game.check_game_over(game.current_player)[0]: # if game ended
@@ -190,8 +204,11 @@ class Train(object):
                     continue
                 else:
                     randplayer.move(move)
+
+        # print(mcts.expanded)
         print("TREE SIZE", mcts.tree_size())
         print('FINAL SCORES ARE ', game.score)
+        game.print_board()
         return game.score
         # game.print_board()
 
