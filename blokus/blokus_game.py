@@ -1,7 +1,7 @@
 from copy import deepcopy
 import numpy as np
 import copy
-from blokus.shape import All_Shapes
+from blokus.piece import All_Pieces
 
 from game import Game
 
@@ -9,32 +9,31 @@ invalid_moves = [line.strip() for line in open("invalid_moves.txt", 'r')]
 invalid_moves = [int(x) for x in invalid_moves]
 
 class BlokusGame(Game):
+    """Class for Blokus Duo"""
 
     def __init__(self, n = 14):
-        
         self.action_size = 17836
         self.invalid_moves = invalid_moves
         self.size = n 
         self.rounds = 0
         self.current_player = 1
         self.state = np.zeros((n,n), dtype = np.int8)
-        self.pieces = {1: All_Shapes,
-                      -1: All_Shapes
+        self.pieces = {1: All_Pieces,
+                      -1: All_Pieces
                         }
         self.score = {1: 0,
                       -1: 0}
 
         self.corners = { 1: set([(4, 4)]), 
-                        -1: set([(self.size -5, self.size-5)])
-                        }
+                        -1: set([(self.size -5, self.size-5)])}
         
     def print_board(self):
+        """prints current board"""
         print(self.state)
 
     def play_action(self, action):
-
+        """given an action (numeric id), plays the action on the board"""
         action = self.translate_action(action)
-        # print(action.points)
         for (col, row) in action.points:
             self.state[col, row] = self.current_player
             self.score[self.current_player] += 1
@@ -45,11 +44,9 @@ class BlokusGame(Game):
         self.corners[-self.current_player] = set([(i, j) for (i, j) in self.corners[-self.current_player] if self.state[i][j] == 0])
 
         self.current_player *= -1
-        # self.print_board()
 
-    
     def get_valid_moves(self, current_player):
-
+        """returns a list of valid moves for the current player"""
         all_moves = np.zeros(self.action_size, dtype = np.int8)
         list_of_legals = self.get_legal_moves(current_player)
         for i in list_of_legals:
@@ -60,7 +57,7 @@ class BlokusGame(Game):
         return all_moves
 
     def check_game_over(self, current_player):
-        # print('CHECKING GAME')
+        """returns a boolean for whether the game is over and the winner of the game"""
         moves = []
         for player in [1, -1]:
             moves.extend(self.get_valid_moves(player))
@@ -76,7 +73,7 @@ class BlokusGame(Game):
 
     def remove_piece(self, piece):
         """
-        Removes a given piece (Shape object) from the list of pieces a player has.
+        removes piece from the current player's pieces
         """
         new_pieces = [s for s in self.pieces[self.current_player] if s.ID != piece.ID]
         return new_pieces   
@@ -84,7 +81,6 @@ class BlokusGame(Game):
     def update_corners(self, action):
         """
         Updates the available corners of a player.
-        Placement should be in the form of a Shape object.
         """
         new_corners = set()
         for c in action.corners:
@@ -109,8 +105,7 @@ class BlokusGame(Game):
 
     def corner(self, player_label, move):
         """
-        Note: ONLY once a move has been checked for adjacency, this function returns a boolean; whether the move is
-        cornering any pieces of the player proposing the move.
+        returns a boolean of if a move is cornering any pieces of the player proposing the move
         """
         validates = []
         for (i, j) in move:
@@ -122,15 +117,11 @@ class BlokusGame(Game):
                 validates.append((self.state[i + 1][j - 1] == player_label))
             if self.in_bounds((i - 1, j + 1)):
                 validates.append((self.state[i - 1][j + 1] == player_label))
-        if True in validates:
-            return True
-        else:
-            return False
-
+        return True in validates
+    
     def adj(self, player_label, move):
         """
-        Checks if a move is adjacent to any squares on the board which are occupied by the player proposing the move
-        and returns a boolean.
+        returns a boolean of if a move is adjacent to any pieces of the player proposing the move
         """
         validates = []
         for (i, j) in move:
@@ -142,10 +133,7 @@ class BlokusGame(Game):
                 validates.append((self.state[i][j - 1] == player_label))
             if self.in_bounds((i, j + 1)):
                 validates.append((self.state[i][j + 1] == player_label))
-        if True in validates:
-            return True
-        else:
-            return False
+        return True in validates
 
     def valid_move(self, action, player_label):
         if self.rounds < 2: # first actions haven't been done yet
@@ -212,87 +200,87 @@ class BlokusGame(Game):
         position = input_number // 91
         input_number = input_number % 91
         if input_number < 8:
-            piece = All_Shapes[0]
+            piece = All_Pieces[0]
             rotation = input_number // 2
             fl = input_number % 2
         elif input_number < 16:
-            piece = All_Shapes[1]
+            piece = All_Pieces[1]
             rotation = (input_number % 8 )// 2
             fl = input_number % 2
         elif input_number < 24:
-            piece = All_Shapes[2]
+            piece = All_Pieces[2]
             rotation = (input_number % 8 )// 2
             fl = input_number % 2
         elif input_number < 32:
-            piece = All_Shapes[3]
+            piece = All_Pieces[3]
             rotation = (input_number % 8 )// 2
             fl = input_number % 2    
         elif input_number < 40:
-            piece = All_Shapes[4]
+            piece = All_Pieces[4]
             rotation = (input_number % 8 )// 2
             fl = input_number % 2
         elif input_number < 48:
-            piece = All_Shapes[5]
+            piece = All_Pieces[5]
             rotation = (input_number % 8 )// 2
             fl = input_number % 2
         elif input_number < 52:
-            piece = All_Shapes[6]
+            piece = All_Pieces[6]
             rotation = (input_number % 4 )// 2
             fl = input_number % 2
         elif input_number < 56:
-            piece = All_Shapes[7]
+            piece = All_Pieces[7]
             rotation = (input_number % 4 )// 2
             fl = input_number % 2
         elif input_number < 60:
-            piece = All_Shapes[8]
+            piece = All_Pieces[8]
             rotation = (input_number % 4 )// 2
             fl = input_number % 2
         elif input_number < 64:
-            piece = All_Shapes[9]
+            piece = All_Pieces[9]
             rotation = (input_number % 4 )// 2
             fl = input_number % 2
         elif input_number < 68:
-            piece = All_Shapes[10]
+            piece = All_Pieces[10]
             rotation = (input_number % 4 )// 2
             fl = input_number % 2
         elif input_number < 72:
-            piece = All_Shapes[11]
+            piece = All_Pieces[11]
             rotation = (input_number % 4 )// 2
             fl = input_number % 2
         elif input_number < 76:
-            piece = All_Shapes[12]
+            piece = All_Pieces[12]
             rotation = (input_number % 4 )// 2
             fl = input_number % 2
         elif input_number < 80:
-            piece = All_Shapes[13]
+            piece = All_Pieces[13]
             rotation = (input_number % 4 )// 2
             fl = input_number % 2
         elif input_number < 82:
-            piece = All_Shapes[14]
+            piece = All_Pieces[14]
             rotation = input_number % 2 
             fl = 0
         elif input_number < 84:
-            piece = All_Shapes[15]
+            piece = All_Pieces[15]
             rotation = input_number % 2 
             fl = 0
         elif input_number < 86:
-            piece = All_Shapes[16]
+            piece = All_Pieces[16]
             rotation = input_number % 2 
             fl = 0
         elif input_number < 88:
-            piece = All_Shapes[17]
+            piece = All_Pieces[17]
             rotation = 0 
             fl = 0
         elif input_number < 89:
-            piece = All_Shapes[18]
+            piece = All_Pieces[18]
             rotation = 0 
             fl = 0
         elif input_number < 90:
-            piece = All_Shapes[19]
+            piece = All_Pieces[19]
             rotation = 0 
             fl = 0
         elif input_number < 91:
-            piece = All_Shapes[20]
+            piece = All_Pieces[20]
             rotation = 0 
             fl = 0
 

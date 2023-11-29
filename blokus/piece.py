@@ -27,7 +27,7 @@ def rotatep(p, ref, d):
     """
     return (int(round(rotatex(p, ref, d))), int(round(rotatey(p, ref, d))))
 
-class Shape(object):
+class Piece(object):
     """
     A class that defines the functions associated with a shape.
     """
@@ -91,7 +91,7 @@ class Shape(object):
         else:
             raise Exception("Invalid orientation.")
 
-class I1(Shape):
+class I1(Piece):
 
     def __init__(self):
         self.ID = "I1"
@@ -103,7 +103,7 @@ class I1(Shape):
         self.points = [(x, y)]
         self.corners = [(x + 1, y + 1), (x - 1, y - 1), (x + 1, y - 1), (x - 1, y + 1)]
 
-class I2(Shape):
+class I2(Piece):
 
     def __init__(self):
         self.ID = "I2"
@@ -115,7 +115,7 @@ class I2(Shape):
         self.points = [(x, y), (x, y + 1)]
         self.corners = [(x - 1, y - 1), (x + 1, y - 1), (x + 1, y + 2), (x - 1, y + 2)]
 
-class I3(Shape):
+class I3(Piece):
     def __init__(self):
         self.ID = "I3"
         self.size = 3
@@ -126,7 +126,7 @@ class I3(Shape):
         self.points = [(x, y), (x, y + 1), (x, y + 2)]
         self.corners = [(x - 1, y - 1), (x + 1, y - 1), (x + 1, y + 3), (x - 1, y + 3)]
 
-class I4(Shape):
+class I4(Piece):
     def __init__(self):
         self.ID = "I4"
         self.size = 4
@@ -137,7 +137,7 @@ class I4(Shape):
         self.points = [(x, y), (x, y + 1), (x, y + 2), (x, y + 3)]
         self.corners = [(x - 1, y - 1), (x + 1, y - 1), (x + 1, y + 4), (x - 1, y + 4)]
 
-class I5(Shape):
+class I5(Piece):
     def __init__(self):
         self.ID = "I5"
         self.size = 5
@@ -148,7 +148,7 @@ class I5(Shape):
         self.points = [(x, y), (x, y + 1), (x, y + 2), (x, y + 3), (x, y + 4)]
         self.corners = [(x - 1, y - 1), (x + 1, y - 1), (x + 1, y + 5), (x - 1, y + 5)]
 
-class V3(Shape):
+class V3(Piece):
     def __init__(self):
         self.ID = "V3"
         self.size = 3
@@ -159,7 +159,7 @@ class V3(Shape):
         self.points = [(x, y), (x, y + 1), (x + 1, y)]
         self.corners = [(x - 1, y - 1), (x + 2, y - 1), (x + 2, y + 1), (x + 1, y + 2), (x - 1, y + 2)]
 
-class L4(Shape):
+class L4(Piece):
     def __init__(self):
         self.ID = "L4"
         self.size = 4
@@ -170,7 +170,7 @@ class L4(Shape):
         self.points = [(x, y), (x, y + 1), (x, y + 2), (x + 1, y)]
         self.corners = [(x - 1, y - 1), (x + 2, y - 1), (x + 2, y + 1), (x + 1, y + 3), (x - 1, y + 3)]
 
-class Z4(Shape):
+class Z4(Piece):
     def __init__(self):
         self.ID = "Z4"
         self.size = 4
@@ -181,7 +181,7 @@ class Z4(Shape):
         self.points = [(x, y), (x, y + 1), (x + 1, y + 1), (x - 1, y)]
         self.corners = [(x - 2, y - 1), (x + 1, y - 1), (x + 2, y), (x + 2, y + 2), (x - 1, y + 2), (x - 2, y + 1)]
 
-class O4(Shape):
+class O4(Piece):
     def __init__(self):
         self.ID = "O4"
         self.size = 4
@@ -192,7 +192,7 @@ class O4(Shape):
         self.points = [(x, y), (x, y + 1), (x + 1, y + 1), (x + 1, y)]
         self.corners = [(x - 1, y - 1), (x + 2, y - 1), (x + 2, y + 2), (x - 1, y + 2)]
 
-class L5(Shape):
+class L5(Piece):
     def __init__(self):
         self.ID = "L5"
         self.size = 5
@@ -203,7 +203,7 @@ class L5(Shape):
         self.points = [(x, y), (x, y + 1), (x + 1, y), (x + 2, y), (x + 3, y)]
         self.corners = [(x - 1, y - 1), (x + 4, y - 1), (x + 4, y + 1), (x + 1, y + 2), (x - 1, y + 2)]
 
-class T5(Shape):
+class T5(Piece):
     def __init__(self):
         self.ID = "T5"
         self.size = 5
@@ -214,7 +214,7 @@ class T5(Shape):
         self.points = [(x, y), (x, y + 1), (x, y + 2), (x - 1, y), (x + 1, y)]
         self.corners = [(x + 2, y - 1), (x + 2, y + 1), (x + 1, y + 3), (x - 1, y + 3), (x - 2, y + 1), (x - 2, y - 1)]
 
-class V5(Shape):
+class V5(Piece):
     def __init__(self):
         self.ID = "V5"
         self.size = 5
@@ -225,7 +225,7 @@ class V5(Shape):
         self.points = [(x, y), (x, y + 1), (x, y + 2), (x + 1, y), (x + 2, y)]
         self.corners = [(x - 1, y - 1), (x + 3, y - 1), (x + 3, y + 1), (x + 1, y + 3), (x - 1, y + 3)]
 
-class N(Shape):
+class N(Piece):
     def __init__(self):
         self.ID = "N"
         self.size = 5
@@ -236,7 +236,7 @@ class N(Shape):
         self.points = [(x, y), (x + 1, y), (x + 2, y), (x, y - 1), (x - 1, y - 1)]
         self.corners = [(x + 1, y - 2), (x + 3, y - 1), (x + 3, y + 1), (x - 1, y + 1), (x - 2, y), (x - 2, y - 2)]
 
-class Z5(Shape):
+class Z5(Piece):
     def __init__(self):
         self.ID = "Z5"
         self.size = 5
@@ -247,7 +247,7 @@ class Z5(Shape):
         self.points = [(x, y), (x + 1, y), (x + 1, y + 1), (x - 1, y), (x - 1, y - 1)]
         self.corners = [(x + 2, y - 1), (x + 2, y + 2), (x, y + 2), (x - 2, y + 1), (x - 2, y - 2), (x, y - 2)]
 
-class T4(Shape):
+class T4(Piece):
     def __init__(self):
         self.ID = "T4"
         self.size = 4
@@ -258,7 +258,7 @@ class T4(Shape):
         self.points = [(x, y), (x, y + 1), (x + 1, y), (x - 1, y)]
         self.corners = [(x + 2, y - 1), (x + 2, y + 1), (x + 1, y + 2), (x - 1, y + 2), (x - 2, y + 1), (x - 2, y - 1)]
 
-class P(Shape):
+class P(Piece):
     def __init__(self):
         self.ID = "P"
         self.size = 5
@@ -269,7 +269,7 @@ class P(Shape):
         self.points = [(x, y), (x + 1, y), (x + 1, y - 1), (x, y - 1), (x, y - 2)]
         self.corners = [(x + 1, y - 3), (x + 2, y - 2), (x + 2, y + 1), (x - 1, y + 1), (x - 1, y - 3)]
 
-class W(Shape):
+class W(Piece):
     def __init__(self):
         self.ID = "W"
         self.size = 5
@@ -281,7 +281,7 @@ class W(Shape):
         self.corners = [(x + 1, y - 1), (x + 2, y), (x + 2, y + 2), (x - 1, y + 2), (x - 2, y + 1), (x - 2, y - 2),
                         (x, y - 2)]
 
-class U(Shape):
+class U(Piece):
     def __init__(self):
         self.ID = "U"
         self.size = 5
@@ -292,7 +292,7 @@ class U(Shape):
         self.points = [(x, y), (x, y + 1), (x + 1, y + 1), (x, y - 1), (x + 1, y - 1)]
         self.corners = [(x + 2, y - 2), (x + 2, y), (x + 2, y + 2), (x - 1, y + 2), (x - 1, y - 2)]
 
-class F(Shape):
+class F(Piece):
     def __init__(self):
         self.ID = "F"
         self.size = 5
@@ -304,7 +304,7 @@ class F(Shape):
         self.corners = [(x + 1, y - 2), (x + 2, y), (x + 2, y + 2), (x - 1, y + 2), (x - 2, y + 1), (x - 2, y - 1),
                         (x - 1, y - 2)]
 
-class X(Shape):
+class X(Piece):
     def __init__(self):
         self.ID = "X"
         self.size = 5
@@ -316,7 +316,7 @@ class X(Shape):
         self.corners = [(x + 1, y - 2), (x + 2, y - 1), (x + 2, y + 1), (x + 1, y + 2), (x - 1, y + 2), (x - 2, y + 1),
                         (x - 2, y - 1), (x - 1, y - 2)]
 
-class Y(Shape):
+class Y(Piece):
     def __init__(self):
         self.ID = "Y"
         self.size = 5
@@ -327,4 +327,4 @@ class Y(Shape):
         self.points = [(x, y), (x, y + 1), (x + 1, y), (x + 2, y), (x - 1, y)]
         self.corners = [(x + 3, y - 1), (x + 3, y + 1), (x + 1, y + 2), (x - 1, y + 2), (x - 2, y + 1), (x - 2, y - 1)]
 
-All_Shapes = [N(), L5(), Y(), P(), F(), L4(), T4(), V5(), T5(), U(), Z5(), Z4(), W(), V3(), I5(), I4(), I3(), I2(), X(), O4(), I1()]
+All_Pieces = [N(), L5(), Y(), P(), F(), L4(), T4(), V5(), T5(), U(), Z5(), Z4(), W(), V3(), I5(), I4(), I3(), I2(), X(), O4(), I1()]
