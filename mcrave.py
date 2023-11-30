@@ -122,5 +122,10 @@ class MCRAVE(MonteCarloTreeSearch):
             state.play_action(move)
             moves.remove(move)
             count -= 1
+
+        p1_rave = []
+        p2_rave = []
+
+
         return state.check_game_over(state.current_player)[1]
     
