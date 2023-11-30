@@ -71,15 +71,21 @@ class Train(object):
         p1_score = 0
         p2_score = 0
         
-        f = open("results/random_mcts.txt", "w")
+        # f = open("results/mcts_vs_mcts_12.txt", "w")
+        # f.write("MCTS vs. MCTS\n")
+        # print("MCTS vs. MCTS")
+        f = open("results/random_vs_mcts_3.txt", "w")
         f.write("Random vs. MCTS\n")
         print("Random vs. MCTS")
-        # f = open("results/mcts_random.txt", "w")
+        # f = open("results/mcts_vs_random_3.txt", "w")
         # f.write("MCTS vs. Random\n")
         # print("MCTS vs. Random")
         for i in range(CFG.num_iterations):
             game = deepcopy(self.game)
-            score = self.random_vs_mcts(game)
+            # score = self.mcts_vs_mcts(game, 12)
+            # score = self.mcts_vs_random(game, 3)
+            score = self.random_vs_mcts(game, 3)
+            # score = self.random_vs_random(game)
             print("Game", i+1, "score:", score)
             if score[1] > score[-1]:
                 p1_win_score += 1
@@ -107,7 +113,7 @@ class Train(object):
         f.write("Average score: " + str(p1_score/CFG.num_iterations) + " " + str(p2_score/CFG.num_iterations) + "\n")
         f.close()
 
-    def mcts_vs_random(self, game: BlokusGame) -> dict:
+    def mcts_vs_random(self, game: BlokusGame, time: int) -> dict:
         """
         Loop for a self play game, where player 1 is MCTS and player 2 is random.
         """
@@ -124,7 +130,7 @@ class Train(object):
                     game_over = True
                     continue
                 else:
-                    mcts.search(time_budget=12)
+                    mcts.search(time_budget=time)
                     move = mcts.best_move()
                     if move == -1:
                         #  elif move == -1: # game over
@@ -154,7 +160,7 @@ class Train(object):
         return game.score
         # game.print_board()
 
-    def random_vs_mcts(self, game: BlokusGame) -> dict:
+    def random_vs_mcts(self, game: BlokusGame, time: int) -> dict:
         """
         Loop for a self play game, where P1 is a random player and P2 is MCTS.
         """
@@ -181,7 +187,7 @@ class Train(object):
                 #     game.current_player *= -1
                 #     continue
                 else:
-                    mcts.search(time_budget=12)
+                    mcts.search(time_budget=time)
                     move = mcts.best_move()
                     if move == -1:
                         randmove = randplayer.choose_move(game)
@@ -232,17 +238,34 @@ class Train(object):
         print('FINAL SCORES ARE ', game.score)
         return game.score
 
-    def mcts_vs_mcts(self, game: BlokusGame) -> dict:
+    def mcts_vs_mcts(self, game: BlokusGame, time: int) -> dict:
         """
         Loop for a self play game, where both players are MCTS.
         """
         game_over = None
         move = None
         mcts = MonteCarloTreeSearch(game)
+        randplayer = RandomPlayer(game)
         while not game_over:
-            if move == -1:
+            if game.check_game_over(game.current_player)[0]: # if game ended
                 game_over = True
+                continue
+            # if move == -1:
+            #     game_over = True
             else:
-                mcts.search(time_budget=3)
+                mcts.search(time_budget=time)
                 move = mcts.best_move()
+                if move == -1:
+                    randmove = randplayer.choose_move(game)
+                    if randmove == -1:
+                        game_over = True
+                    else:
+                        game.play_action(randmove)
+                        game.current_player *= -1
+                        
+                    game.current_player *= -1
+                    continue
+
                 mcts.move(move)
+        print('FINAL SCORES ARE ', game.score)
+        return game.score

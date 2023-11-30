@@ -30,8 +30,8 @@ class Node:
         self.parent = parent
         self.N = 0  # times this position was visited
         self.Q = 0  # average reward (wins-losses) from this position
-        # self.Q_RAVE = 0  # times this move has been critical in a rollout
-        # self.N_RAVE = 0  # times this move has appeared in a rollout
+        self.Q_RAVE = 0  # times this move has been critical in a rollout
+        self.N_RAVE = 0  # times this move has appeared in a rollout
         self.children = {}
         self.outcome = 0
         self.expanded = 0
