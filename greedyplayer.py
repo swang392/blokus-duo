@@ -39,7 +39,7 @@ class GreedyPlayer:
         return -1
     
 class GreedyCorner(GreedyPlayer):
-    """a grredy agent that aims to maximize the number of corners"""
+    """a greedy agent that aims to maximize the number of corners"""
     def __init__(self, game: BlokusGame):
         super().__init__(game)
     
@@ -58,4 +58,38 @@ class GreedyCorner(GreedyPlayer):
         # print("BLAH", var2 - var1)
         return var2 - var1
 
+class GreedyCornerDiff(GreedyPlayer):
+    """
+    a greedy agent that aims to maximize the difference
+    in number of corners between a player and their opponent
+    """
+    def __init__(self, game: BlokusGame):
+        super().__init__(game)
 
+    def payoff(self, game, move):
+        state = deepcopy(game)
+        current_player = state.current_player
+        opp_player = current_player * -1
+        state.play_action(move)
+        curr_corner = len(state.corners[current_player])
+        opp_corner = len(state.corners[opp_player])
+        return curr_corner - opp_corner
+    
+class GreedyCombination(GreedyPlayer):
+    def __init__(self, game: BlokusGame):
+        super().__init__(game)
+    
+    def payoff(self, game, move):
+        state = deepcopy(game)
+        current_player = state.current_player
+        opp_player = current_player * -1
+        state.play_action(move)
+        curr_corner = len(state.corners[current_player])
+        opp_corner = len(state.corners[opp_player])
+        corner_difference = curr_corner - opp_corner
+
+        move_trans = state.translate_action(move)
+        move_size = move_trans.size
+
+        heuristic = corner_difference + 2 * move_size
+        return heuristic

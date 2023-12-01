@@ -5,7 +5,7 @@ from mcts import MonteCarloTreeSearch
 from blokus.blokus_game import BlokusGame
 from copy import deepcopy
 from randplayer import RandomPlayer
-from greedyplayer import GreedyPlayer, GreedyCorner
+from greedyplayer import GreedyPlayer, GreedyCorner, GreedyCornerDiff
 
 class Train(object):
     """Class with functions to train the Neural Network using MCTS.
@@ -74,10 +74,9 @@ class Train(object):
         # f = open("results/mcts_vs_mcts_12.txt", "w")
         # f.write("MCTS vs. MCTS\n")
         # print("MCTS vs. MCTS")
-        f = open("results/greedycorner_random.txt", "w")
-
-        f.write("Greedy vs. Random, corner maximization\n")
-        print("Greedy vs. Random, corner maximization")
+        f = open("results/corner_corner.txt", "w")
+        f.write("Greedy vs. Greedy, corner and size\n")
+        print("Greedy vs. Greedy, corner and size")
         # f = open("results/mcts_vs_random_3.txt", "w")
         # f.write("MCTS vs. Random\n")
         # print("MCTS vs. Random")
@@ -85,7 +84,7 @@ class Train(object):
             game = deepcopy(self.game)
             # score = self.mcts_vs_mcts(game, 12)
             # score = self.mcts_vs_random(game, 3)
-            score = self.greedy_vs_random(game)
+            score = self.greedy_vs_greedy(game)
             # score = self.random_vs_random(game)
             print("Game", i+1, "score:", score)
             if score[1] > score[-1]:
@@ -119,7 +118,7 @@ class Train(object):
         Loop for a self play game, where player 1 is Random and player 2 is greedy, corner maximization.
         """
         randplayer = RandomPlayer(game)
-        greedyplayer = GreedyCorner(game)
+        greedyplayer = GreedyCornerDiff(game)
         game_over = False
         move = None
 
@@ -127,14 +126,14 @@ class Train(object):
             if game.check_game_over(game.current_player)[0]: # if game ended
                 game_over = True
                 continue
-            elif game.current_player == -1:
+            elif game.current_player == 1:
                 move = randplayer.choose_move(game)
                 if move == -1:
                     game.current_player *= -1
                     continue
                 else:
                     randplayer.move(move)
-            elif game.current_player == 1:
+            elif game.current_player == -1:
                 move = greedyplayer.choose_move(game)
                 if move == -1:
                     game.current_player *= -1
@@ -148,10 +147,6 @@ class Train(object):
             # else:
             #     randplayer.move(move)
         print('FINAL SCORES ARE ', game.score)
-        return game.score
-
-        print('FINAL SCORES ARE ', game.score)
-        game.print_board()
         return game.score
 
     def mcts_vs_random(self, game: BlokusGame, time: int) -> dict:
@@ -276,6 +271,26 @@ class Train(object):
                 continue
             else:
                 randplayer.move(move)
+        print('FINAL SCORES ARE ', game.score)
+        return game.score
+
+    def greedy_vs_greedy(self, game:BlokusGame) -> dict:
+        """
+        Loop for a self play game, where both players are greedy.
+        """
+        game_over = None
+        move = None
+        greedyplayer = GreedyCorner(game)
+        while not game_over:
+            if game.check_game_over(game.current_player)[0]:
+                game_over = True
+                continue
+            move = greedyplayer.choose_move(game)
+            if move == -1:
+                game.current_player *= -1
+                continue
+            else:
+                greedyplayer.move(move)
         print('FINAL SCORES ARE ', game.score)
         return game.score
 
