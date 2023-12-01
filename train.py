@@ -5,7 +5,7 @@ from mcts import MonteCarloTreeSearch
 from blokus.blokus_game import BlokusGame
 from copy import deepcopy
 from randplayer import RandomPlayer
-from greedyplayer import GreedyPlayer, GreedyCorner, GreedyCornerDiff
+from greedyplayer import GreedyPlayer, GreedyCorner, GreedyCornerDiff, GreedyCombination
 
 class Train(object):
     """Class with functions to train the Neural Network using MCTS.
@@ -74,9 +74,9 @@ class Train(object):
         # f = open("results/mcts_vs_mcts_12.txt", "w")
         # f.write("MCTS vs. MCTS\n")
         # print("MCTS vs. MCTS")
-        f = open("results/corner_corner.txt", "w")
-        f.write("Greedy vs. Greedy, corner and size\n")
-        print("Greedy vs. Greedy, corner and size")
+        f = open("results/random_combo.txt", "w")
+        f.write("Random vs. Greedy, corner and size\n")
+        print("Random vs. Greedy, corner and size")
         # f = open("results/mcts_vs_random_3.txt", "w")
         # f.write("MCTS vs. Random\n")
         # print("MCTS vs. Random")
@@ -84,7 +84,7 @@ class Train(object):
             game = deepcopy(self.game)
             # score = self.mcts_vs_mcts(game, 12)
             # score = self.mcts_vs_random(game, 3)
-            score = self.greedy_vs_greedy(game)
+            score = self.greedy_vs_random(game)
             # score = self.random_vs_random(game)
             print("Game", i+1, "score:", score)
             if score[1] > score[-1]:
@@ -118,7 +118,7 @@ class Train(object):
         Loop for a self play game, where player 1 is Random and player 2 is greedy, corner maximization.
         """
         randplayer = RandomPlayer(game)
-        greedyplayer = GreedyCornerDiff(game)
+        greedyplayer = GreedyCombination(game)
         game_over = False
         move = None
 
@@ -280,7 +280,7 @@ class Train(object):
         """
         game_over = None
         move = None
-        greedyplayer = GreedyCorner(game)
+        greedyplayer = GreedyCombination(game)
         while not game_over:
             if game.check_game_over(game.current_player)[0]:
                 game_over = True
@@ -291,6 +291,7 @@ class Train(object):
                 continue
             else:
                 greedyplayer.move(move)
+            # game.print_board()
         print('FINAL SCORES ARE ', game.score)
         return game.score
 
