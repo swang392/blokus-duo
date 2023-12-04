@@ -131,7 +131,6 @@ class MonteCarloTreeSearch:
             node, state = self.select_node()
             turn = state.current_player * -1
             outcome = self.roll_out(state)
-            # print("outcome", outcome)
             self.backup(node, turn, outcome)
             num_rollouts += 1
         # run_time = clock() - start_time
@@ -192,26 +191,23 @@ class MonteCarloTreeSearch:
             int: winner of the game
 
         """
-        curr_player = state.current_player
-        depth = 10 # play 10 moves maximum 
-        current_state = state
-        while not current_state.check_game_over(current_state.current_player)[0] and depth > 0:
-            valid_moves = list(current_state.get_valid_moves(current_state.current_player))
-            moves = []
-            for idx, move in enumerate(valid_moves):
-                if move == 1:
-                    moves.append(idx)
-            if len(moves) == 0:
-                break
+        # TODO: don't simulate the entire game, simulate x number of steps and see who is winning
+        # print("rollout")
+        valid_moves = list(state.get_valid_moves(state.current_player))
+        moves = []
+        for idx, move in enumerate(valid_moves):
+            if move == 1:
+                moves.append(idx)
+        # moves = state.moves()  # Get a list of all possible moves in current state of the game
+        # count = 10
+        count = 100
+        while count > 0 and state.check_game_over(state.current_player)[1] == 0 and moves:
+            # print("rollout moves:", len(moves))
             move = choice(moves)
-            current_state.play_action(move)
+            state.play_action(move)
             moves.remove(move)
-            depth -= 1
-
-        if depth > 0:
-            return current_state.check_game_over(current_state.current_player)[1] * 100
-        else:
-            return current_state.heuristic(curr_player)
+            count -= 1
+        return state.check_game_over(state.current_player)[1]
     
     @staticmethod
     def backup(node: Node, turn: int, outcome: int) -> None:
@@ -231,13 +227,13 @@ class MonteCarloTreeSearch:
         # print("backup")
         # Careful: The reward is calculated for player who just played
         # at the node and not the next player to play
-        # reward = 0 if outcome == turn * 50 else outcome
+        reward = 0 if outcome == turn else 1
 
         while node is not None:
             node.N += 1
-            node.Q += outcome
+            node.Q += reward
             node = node.parent
-            # reward = 0 if reward == 50 else 50
+            reward = 0 if reward == 1 else 1
 
     def tree_size(self) -> int:
         """

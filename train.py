@@ -19,21 +19,30 @@ class Train(object):
         """Initializes Train with the board state and neural network."""
         self.game = game
 
-    def start_random_vs_random(self, num_iterations: int):
+    def start(self, num_iterations: int):
+        """playing loop"""
         p1_win_score = 0
         p2_win_score = 0
         p1_win_margin = 0
         p2_win_margin = 0
         p1_score = 0
         p2_score = 0
-
-        f = open("results/random_vs_random.txt", "w")
-        f.write("Random vs. Random\n")
-        print("Random vs. Random")
-
+        
+        # f = open("results/mcts_vs_mcts_12.txt", "w")
+        # f.write("MCTS vs. MCTS\n")
+        # print("MCTS vs. MCTS")
+        f = open("results/random_mcts.txt", "w")
+        f.write("Random vs. MCTS\n")
+        print("Random vs. MCTS")
+        # f = open("results/mcts_random.txt", "w")
+        # f.write("MCTS vs. Random\n")
+        # print("MCTS vs. Random")
         for i in range(num_iterations):
             game = deepcopy(self.game)
-            score = self.random_vs_random(game)
+            # score = self.mcts_vs_mcts(game, 12)
+            # score = self.mcts_vs_random(game, 12)
+            score = self.random_vs_mcts(game, 12)
+            # score = self.random_vs_random(game)
             print("Game", i+1, "score:", score)
             if score[1] > score[-1]:
                 p1_win_score += 1
@@ -60,32 +69,22 @@ class Train(object):
         print("average score", p1_score/num_iterations, p2_score/num_iterations)
         f.write("Average score: " + str(p1_score/num_iterations) + " " + str(p2_score/num_iterations) + "\n")
         f.close()
-
-
-    def start(self, num_iterations: int):
-        """playing loop"""
+    
+    def start_random_vs_random(self, num_iterations: int):
         p1_win_score = 0
         p2_win_score = 0
         p1_win_margin = 0
         p2_win_margin = 0
         p1_score = 0
         p2_score = 0
-        
-        # f = open("results/mcts_vs_mcts_12.txt", "w")
-        # f.write("MCTS vs. MCTS\n")
-        # print("MCTS vs. MCTS")
-        f = open("results/random_combo.txt", "w")
-        f.write("Random vs. Greedy, corner and size\n")
-        print("Random vs. Greedy, corner and size")
-        # f = open("results/mcts_vs_random_3.txt", "w")
-        # f.write("MCTS vs. Random\n")
-        # print("MCTS vs. Random")
+
+        f = open("results/random_vs_random.txt", "w")
+        f.write("Random vs. Random\n")
+        print("Random vs. Random")
+
         for i in range(num_iterations):
             game = deepcopy(self.game)
-            # score = self.mcts_vs_mcts(game, 12)
-            # score = self.mcts_vs_random(game, 3)
-            score = self.greedy_vs_random(game)
-            # score = self.random_vs_random(game)
+            score = self.random_vs_random(game)
             print("Game", i+1, "score:", score)
             if score[1] > score[-1]:
                 p1_win_score += 1
@@ -190,7 +189,6 @@ class Train(object):
                     continue
                 else:
                     randplayer.move(move)
-            
         print('FINAL SCORES ARE ', game.score)
         game.print_board()
         return game.score
@@ -212,16 +210,6 @@ class Train(object):
                 if game.check_game_over(game.current_player)[0]: # if game ended
                     game_over = True
                     continue
-                # elif move == -1: # game over
-                #     randmove = randplayer.choose_move(game)
-                #     if randmove == -1:
-                #         game_over = True
-                #     else:
-                #         game.play_action(randmove)
-                #         game.current_player *= -1
-                        
-                #     game.current_player *= -1
-                #     continue
                 else:
                     mcts.search(time_budget=time)
                     move = mcts.best_move()
@@ -246,7 +234,6 @@ class Train(object):
                     continue
                 else:
                     randplayer.move(move)
-
         # print(mcts.expanded)
         print("TREE SIZE", mcts.tree_size())
         print('FINAL SCORES ARE ', game.score)

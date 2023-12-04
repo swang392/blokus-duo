@@ -45,6 +45,15 @@ class BlokusGame(Game):
 
         self.current_player *= -1
 
+    def heuristic(self, current_player):
+        """returns the heuristic for the current player"""
+        curr_corner = len(self.corners[current_player])
+        opp_corner = len(self.corners[current_player * -1])
+        corner_difference = curr_corner - opp_corner
+        size = self.score[current_player] - self.score[current_player * -1]
+
+        return corner_difference + 2 * size
+
     def get_valid_moves(self, current_player):
         """returns a list of valid moves for the current player"""
         all_moves = np.zeros(self.action_size, dtype = np.int8)
