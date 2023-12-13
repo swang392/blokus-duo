@@ -1,22 +1,18 @@
-"""Class to train the Neural Network."""
-# import numpy as np
-
+"""testing the different agents against each other"""
 from mcts import MonteCarloTreeSearch
 from blokus.blokus_game import BlokusGame
 from copy import deepcopy
 from randplayer import RandomPlayer
 from greedyplayer import GreedyPlayer, GreedyCorner, GreedyCornerDiff, GreedyCombination
 
-class Train(object):
-    """Class with functions to train the Neural Network using MCTS.
-
-    Attributes:
-        game: An object containing the game state.
-        net: An object containing the neural network.
+class Tester(object):
+    """
+    class to set up tests between different agents
     """
 
     def __init__(self, game):
-        """Initializes Train with the board state and neural network."""
+        """
+        Initialize the testing class."""
         self.game = game
 
     def start(self, num_iterations: int):
@@ -139,12 +135,6 @@ class Train(object):
                     continue
                 else:
                     greedyplayer.move(move)
-            # move = randplayer.choose_move(game)
-            # if move == -1: # pass
-            #     game.current_player *= -1
-            #     continue
-            # else:
-            #     randplayer.move(move)
         print('FINAL SCORES ARE ', game.score)
         return game.score
 

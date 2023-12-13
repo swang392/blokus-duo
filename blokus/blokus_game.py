@@ -1,6 +1,5 @@
 from copy import deepcopy
 import numpy as np
-import copy
 from blokus.piece import All_Pieces
 
 from game import Game
@@ -62,7 +61,6 @@ class BlokusGame(Game):
             if i not in self.invalid_moves:
                 all_moves[i] = 1
 
-
         return all_moves
 
     def check_game_over(self, current_player):
@@ -109,89 +107,73 @@ class BlokusGame(Game):
         """
         if False in [(self.state[i][j] == 0) for (i, j) in move]:
             return True
-        else:
-            return False
+        return False
 
     def corner(self, player_label, move):
         """
         returns a boolean of if a move is cornering any pieces of the player proposing the move
         """
-        validates = []
+        corners = []
         for (i, j) in move:
             if self.in_bounds((i + 1, j + 1,)):
-                validates.append((self.state[i + 1][j + 1] == player_label))
+                corners.append((self.state[i + 1][j + 1] == player_label))
             if self.in_bounds((i - 1, j - 1)):
-                validates.append((self.state[i - 1][j - 1] == player_label))
+                corners.append((self.state[i - 1][j - 1] == player_label))
             if self.in_bounds((i + 1, j - 1,)):
-                validates.append((self.state[i + 1][j - 1] == player_label))
+                corners.append((self.state[i + 1][j - 1] == player_label))
             if self.in_bounds((i - 1, j + 1)):
-                validates.append((self.state[i - 1][j + 1] == player_label))
-        return True in validates
+                corners.append((self.state[i - 1][j + 1] == player_label))
+        return True in corners
     
     def adj(self, player_label, move):
         """
         returns a boolean of if a move is adjacent to any pieces of the player proposing the move
         """
-        validates = []
+        adjacents = []
         for (i, j) in move:
             if self.in_bounds((i + 1, j)):
-                validates.append((self.state[i + 1][j] == player_label))
+                adjacents.append((self.state[i + 1][j] == player_label))
             if self.in_bounds((i - 1, j)):
-                validates.append((self.state[i - 1][j] == player_label))
+                adjacents.append((self.state[i - 1][j] == player_label))
             if self.in_bounds((i, j - 1)):
-                validates.append((self.state[i][j - 1] == player_label))
+                adjacents.append((self.state[i][j - 1] == player_label))
             if self.in_bounds((i, j + 1)):
-                validates.append((self.state[i][j + 1] == player_label))
-        return True in validates
+                adjacents.append((self.state[i][j + 1] == player_label))
+        return True in adjacents
 
     def valid_move(self, action, player_label):
         if self.rounds < 2: # first actions haven't been done yet
             if ((False in [self.in_bounds(pt) for pt in action]) 
                 or self.overlap(action) 
                 or not (True in [(pt in self.corners[player_label]) for pt in action])):
-                
                 return False
-            
-            else:
-                return True
+            return True
 
         elif ((False in [self.in_bounds(pt) for pt in action])
               or self.overlap(action)
               or self.adj(player_label, action)
               or not self.corner(player_label, action)):
             return False
-
-        else:
-            return True
+        return True
 
     def get_legal_moves(self, player_label):
-        # print('WERE IN GET LEGAL MOVES')
         placements = []
         visited = []
-        # Loop through every available corner.
         for cr in self.corners[player_label]:
-            # Look through every piece offered. (This will be restricted according to certain algorithms.)
             for sh in self.pieces[player_label]:
-                # Create a new shape so that the one in the player's list of shapes is not overwritten.
-                try_out = copy.deepcopy(sh)
-                # Loop over every potential refpt the piece could have.
-                # for num in range(try_out.size):
+                try_out = deepcopy(sh)
                 try_out.create(0, cr)
-                # And every possible flip.
                 for fl in try_out.flips:
-                    temp_fl = copy.deepcopy(try_out)
+                    temp_fl = deepcopy(try_out)
                     temp_fl.flip(fl)
-                    # And every possible orientation.
                     for rot in try_out.rots:
-                        temp_rot = copy.deepcopy(temp_fl)
+                        temp_rot = deepcopy(temp_fl)
                         temp_rot.rotate(rot)
-                        candidate = copy.deepcopy(temp_rot)
+                        candidate = deepcopy(temp_rot)
                         if fl == 'h':
                             f = 1
                         else:
                             f = 0
-                        
-
 
                         if candidate.ID not in ['I5', 'I4','I3','I2']:
                             encoding = (cr[0] * 14 + cr[1]) * 91 + temp_rot.shift + (rot//90)*2 + f
@@ -203,7 +185,6 @@ class BlokusGame(Game):
                                 placements.append(encoding) 
                                 visited.append(set(candidate.points))
         return placements
-
 
     def translate_action(self, input_number):
         position = input_number // 91

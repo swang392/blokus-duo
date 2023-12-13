@@ -4,7 +4,7 @@ import os
 
 from blokus.blokus_game import BlokusGame
 # from neural_net import NeuralNetworkWrapper 
-from train import Train
+from testing import Tester
 # from human_player import Human_player
 
 # Code to read command line arguments
@@ -25,5 +25,5 @@ if __name__ == '__main__':
 
     game = BlokusGame()
 
-    train = Train(game)
-    train.start(num_iterations)
+    tester = Tester(game)
+    tester.start(num_iterations)
